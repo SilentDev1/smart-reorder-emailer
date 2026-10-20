@@ -3,7 +3,7 @@
  * Plugin Name: Smart Reorder Emailer Pro
  * Plugin URI:  https://cao-tech.com/smart-reorder-emailer
  * Description: AI-powered reorder reminders, customer segmentation, predictive analytics, discount codes, and A/B testing for WooCommerce.
- * Version:     5.3.2
+ * Version:     5.3.3
  * Author:      Cao-Tech LLC
  * Author URI:  https://cao-tech.com
  * License:     GPL-2.0-or-later
@@ -26,7 +26,7 @@ add_action( 'before_woocommerce_init', function () {
     }
 } );
 
-define( 'SRE_VERSION', '5.3.2' );
+define( 'SRE_VERSION', '5.3.3' );
 define( 'SRE_FILE', __FILE__ );
 
 function sre_activate() {
@@ -4775,8 +4775,11 @@ function sre_page_upgrade() {
             if ( ! is_wp_error( $response ) ) {
                 $body = json_decode( wp_remote_retrieve_body( $response ), true );
                 if ( ! empty( $body['success'] ) ) {
+                    // License server 3.9.1+ emails an existing key to the license email instead of returning it.
                     if ( ! empty( $body['license_key'] ) ) {
                         echo '<div class="notice notice-success"><p>You already have an active license! Your key is: <code>' . esc_html( $body['license_key'] ) . '</code> — enter it below to activate Pro.</p></div>';
+                    } elseif ( 'emailed' === ( $body['status'] ?? '' ) ) {
+                        echo '<div class="notice notice-success"><p>' . esc_html( $body['message'] ?? 'If this site already has a license, we have emailed the key to the license email.' ) . ' Enter it below to activate Pro.</p></div>';
                     } else {
                         echo '<div class="notice notice-success"><p>Your Pro license request has been submitted! We will review it and send your license key by email.</p></div>';
                     }
